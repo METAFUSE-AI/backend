@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/login")
-public class LoginController {
+public class KakaoLoginPageController {
 
     @Value("${kakao.client_id}")
     private String client_id;
