@@ -1,37 +1,38 @@
 package com.mefafuse.backend.Controller;
 
+import com.mefafuse.backend.Entity.Member;
 import com.mefafuse.backend.Entity.Test;
+import com.mefafuse.backend.Repository.MemberRepository;
 import com.mefafuse.backend.Repository.TestRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/tests")
+@CrossOrigin(origins = "http://localhost:8080") // 클라이언트 URL
 public class TestController {
-
-    private static final Logger logger = LoggerFactory.getLogger(TestController.class);
+    // API 메소드
 
     @Autowired
     private TestRepository testRepository;
 
-    @PostMapping
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @PostMapping("/create")
     public Test createTest(@RequestBody Test test) {
-        // 로그로 데이터 확인
-        logger.info("Received test data: {}", test);
+        // Member ID를 여기서 설정
+        Long memberId = 1L; // 예시: 항상 1번 멤버로 설정 (실제 구현에서는 적절한 로직으로 변경 필요)
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found with id " + memberId));
 
-        // 현재 시간 설정
-        test.setTestDate(LocalDateTime.now());
-        test.setCreatedAt(LocalDateTime.now().toString());
-        test.setUpdatedAt(LocalDateTime.now().toString());
+        // Test 엔티티에 Member 설정
+        test.setMember(member);
+        test.setCreatedAt(new Date());
+        test.setUpdatedAt(new Date());
 
-        // 데이터베이스에 저장
-        Test savedTest = testRepository.save(test);
-        logger.info("Saved test data: {}", savedTest);
-
-        return savedTest;
+        return testRepository.save(test);
     }
 }
