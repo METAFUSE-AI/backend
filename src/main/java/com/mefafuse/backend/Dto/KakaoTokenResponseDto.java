@@ -16,12 +16,12 @@ public class KakaoTokenResponseDto {
     public String accessToken;
     @JsonProperty("id_token")
     public String idToken;
-    @JsonProperty("expires_in")
-    public Integer expiresIn;
-    @JsonProperty("refresh_token")
-    public String refreshToken;
-    @JsonProperty("refresh_token_expires_in")
-    public Integer refreshTokenExpiresIn;
-    @JsonProperty("scope")
-    public String scope;
+//    @JsonProperty("expires_in")
+//    public Integer expiresIn;
+//    @JsonProperty("refresh_token")
+//    public String refreshToken;
+//    @JsonProperty("refresh_token_expires_in")
+//    public Integer refreshTokenExpiresIn;
+//    @JsonProperty("scope")
+//    public String scope;
 }
