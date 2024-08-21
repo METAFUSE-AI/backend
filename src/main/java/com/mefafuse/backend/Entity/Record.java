@@ -1,12 +1,14 @@
 package com.mefafuse.backend.Entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 public class Record {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer recordId;
+    private Long recordId; // 변경된 ID 타입
 
     @ManyToOne
     @JoinColumn(name = "memberId", nullable = false)
@@ -20,4 +22,67 @@ public class Record {
     private String updatedAt;
 
     // Getters and Setters
+    public Long getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(Long recordId) {
+        this.recordId = recordId;
+    }
+
+    public Member getMember() {
+        return member;
+    }
+
+    public void setMember(Member member) {
+        this.member = member;
+    }
+
+    public String getRecordHistory() {
+        return recordHistory;
+    }
+
+    public void setRecordHistory(String recordHistory) {
+        this.recordHistory = recordHistory;
+    }
+
+    public String getRecordContents() {
+        return recordContents;
+    }
+
+    public void setRecordContents(String recordContents) {
+        this.recordContents = recordContents;
+    }
+
+    public String getRecordQuestion() {
+        return recordQuestion;
+    }
+
+    public void setRecordQuestion(String recordQuestion) {
+        this.recordQuestion = recordQuestion;
+    }
+
+    public String getRecordAnswer() {
+        return recordAnswer;
+    }
+
+    public void setRecordAnswer(String recordAnswer) {
+        this.recordAnswer = recordAnswer;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }
