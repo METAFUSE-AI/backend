@@ -1,10 +1,7 @@
 package com.mefafuse.backend.Entity;
 
 import com.mefafuse.backend.Entity.idclass.PersonalId;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
+import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -15,7 +12,7 @@ public class Personal implements Serializable {
 
     @Id
     @Column(name = "MEMBER_ID")
-    private Integer memberId;
+    private Long memberId; // Integer -> Long 변경
 
     @Id
     @Column(name = "TEST_INDEX")
@@ -23,17 +20,14 @@ public class Personal implements Serializable {
 
     @Id
     @Column(name = "TEST_RESULT_ID")
-    private Integer testResultId;
-
-    // Other fields and relationships can be added here
-    // For example, you can map relationships to Member, Test, and TestResult entities
+    private Long testResultId; // Integer -> Long 변경
 
     // Getters and Setters
-    public Integer getMemberId() {
+    public Long getMemberId() {
         return memberId;
     }
 
-    public void setMemberId(Integer memberId) {
+    public void setMemberId(Long memberId) {
         this.memberId = memberId;
     }
 
@@ -45,11 +39,11 @@ public class Personal implements Serializable {
         this.testIndex = testIndex;
     }
 
-    public Integer getTestResultId() {
+    public Long getTestResultId() {
         return testResultId;
     }
 
-    public void setTestResultId(Integer testResultId) {
+    public void setTestResultId(Long testResultId) {
         this.testResultId = testResultId;
     }
 
@@ -69,4 +63,3 @@ public class Personal implements Serializable {
         return Objects.hash(memberId, testIndex, testResultId);
     }
 }
-

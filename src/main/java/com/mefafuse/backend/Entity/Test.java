@@ -1,7 +1,6 @@
 package com.mefafuse.backend.Entity;
 
 import jakarta.persistence.*;
-
 import java.util.Date;
 
 @Entity
@@ -15,6 +14,13 @@ public class Test {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    private String question;
+    private Date testDate;
+    private int testScore;
+    private Date createdAt;
+    private Date updatedAt;
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -70,12 +76,4 @@ public class Test {
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
-
-    private String question;
-    private Date testDate;
-    private int testScore;
-    private Date createdAt;
-    private Date updatedAt;
-
-    // getters and setters
 }

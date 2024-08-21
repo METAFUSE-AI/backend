@@ -1,17 +1,28 @@
 package com.mefafuse.backend.Entity.idclass;
+
 import java.io.Serializable;
 import java.util.Objects;
 
 public class PersonalId implements Serializable {
-    private Integer memberId;
+    private Long memberId; // Integer -> Long 변경
     private Integer testIndex;
-    private Integer testResultId;
+    private Long testResultId; // Integer -> Long 변경
 
-    public Integer getMemberId() {
+    public PersonalId() {
+    }
+
+    public PersonalId(Long memberId, Integer testIndex, Long testResultId) {
+        this.memberId = memberId;
+        this.testIndex = testIndex;
+        this.testResultId = testResultId;
+    }
+
+    // Getters, Setters, hashCode, equals methods
+    public Long getMemberId() {
         return memberId;
     }
 
-    public void setMemberId(Integer memberId) {
+    public void setMemberId(Long memberId) {
         this.memberId = memberId;
     }
 
@@ -23,24 +34,13 @@ public class PersonalId implements Serializable {
         this.testIndex = testIndex;
     }
 
-    public Integer getTestResultId() {
+    public Long getTestResultId() {
         return testResultId;
     }
 
-    public void setTestResultId(Integer testResultId) {
+    public void setTestResultId(Long testResultId) {
         this.testResultId = testResultId;
     }
-
-    public PersonalId() {
-    }
-
-    public PersonalId(Integer memberId, Integer testIndex, Integer testResultId) {
-        this.memberId = memberId;
-        this.testIndex = testIndex;
-        this.testResultId = testResultId;
-    }
-
-    // Getters, Setters, hashCode, equals methods
 
     @Override
     public boolean equals(Object o) {

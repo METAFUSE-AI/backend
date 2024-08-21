@@ -6,13 +6,27 @@ import jakarta.persistence.*;
 public class TestResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer testResultId;
+    private Long testResultId; // Integer -> Long 변경
 
-    public Integer getTestResultId() {
+    @ManyToOne
+    @JoinColumn(name = "testId", nullable = false)
+    private Test test;
+
+    @ManyToOne
+    @JoinColumn(name = "memberId", nullable = false)
+    private Member member;
+
+    private String resultType;
+    private Integer score;
+    private String createdAt;
+    private String updatedAt;
+
+    // Getters and Setters
+    public Long getTestResultId() {
         return testResultId;
     }
 
-    public void setTestResultId(Integer testResultId) {
+    public void setTestResultId(Long testResultId) {
         this.testResultId = testResultId;
     }
 
@@ -63,19 +77,4 @@ public class TestResult {
     public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
     }
-
-    @ManyToOne
-    @JoinColumn(name = "testId", nullable = false)
-    private Test test;
-
-    @ManyToOne
-    @JoinColumn(name = "memberId", nullable = false)
-    private Member member;
-
-    private String resultType;
-    private Integer score;
-    private String createdAt;
-    private String updatedAt;
-
-    // Getters and Setters
 }

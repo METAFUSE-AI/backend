@@ -11,9 +11,8 @@ import java.util.Date;
 
 @RestController
 @RequestMapping("/tests")
-@CrossOrigin(origins = "http://localhost:8080") // 클라이언트 URL
+@CrossOrigin(origins = "http://172.30.1.36:19006")
 public class TestController {
-    // API 메소드
 
     @Autowired
     private TestRepository testRepository;
@@ -23,8 +22,8 @@ public class TestController {
 
     @PostMapping("/create")
     public Test createTest(@RequestBody Test test) {
-        // Member ID를 여기서 설정
-        Long memberId = 1L; // 예시: 항상 1번 멤버로 설정 (실제 구현에서는 적절한 로직으로 변경 필요)
+        // 여기서 멤버 ID를 받아서 처리
+        Long memberId = test.getMember().getMemberId(); // 프론트에서 받은 memberId 사용
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("Member not found with id " + memberId));
 
