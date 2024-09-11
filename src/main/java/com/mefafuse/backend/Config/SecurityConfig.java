@@ -4,24 +4,32 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final CorsConfigurationSource corsConfigurationSource;
+
+    // CorsConfigurationSource 주입
+    public SecurityConfig(CorsConfigurationSource corsConfigurationSource) {
+        this.corsConfigurationSource = corsConfigurationSource;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable())  // CSRF 비활성화
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/login/**", "/oauth2/**").permitAll()  // 로그인, OAuth 경로는 모두 접근 가능
-                        .anyRequest().authenticated()  // 그 외 요청은 인증 필요
+                        .requestMatchers("/login/**", "/oauth2/**", "/records/**", "/tests/**", "/**").permitAll()  // 특정 경로 모두 허용
+                        .anyRequest().authenticated()  // 그 외 경로는 인증 필요
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .defaultSuccessUrl("/home", true)  // 로그인 성공 후 리다이렉트 URI 설정
-                );
+                        .defaultSuccessUrl("/home", true)  // 로그인 성공 후 리다이렉트
+                )
+                .cors(cors -> cors.configurationSource(corsConfigurationSource));  // CORS 설정
 
         return http.build();
     }
