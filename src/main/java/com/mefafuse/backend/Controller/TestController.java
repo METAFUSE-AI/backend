@@ -2,7 +2,6 @@ package com.mefafuse.backend.Controller;
 
 import com.mefafuse.backend.Entity.Member;
 import com.mefafuse.backend.Entity.Test;
-import com.mefafuse.backend.Repository.MemberRepository;
 import com.mefafuse.backend.Repository.TestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

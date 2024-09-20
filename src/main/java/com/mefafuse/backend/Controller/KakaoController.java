@@ -1,80 +1,127 @@
 package com.mefafuse.backend.Controller;
 
-import com.mefafuse.backend.Entity.KakaoTokenRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mefafuse.backend.Entity.KakaoUser;
+import com.mefafuse.backend.Repository.KakaoUserRepository;
+import org.json.JSONObject;
 import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/oauth2/kakao")
 public class KakaoController {
 
-    private static final Logger logger = LoggerFactory.getLogger(KakaoController.class);
+    private final RestTemplate restTemplate;
+    private final KakaoUserRepository kakaoUserRepository;
+    private final ObjectMapper objectMapper; // JSON 처리를 위한 ObjectMapper
 
-    @Value("${kakao.client.id}")
-    private String clientId;
+    public KakaoController(RestTemplate restTemplate, KakaoUserRepository kakaoUserRepository, ObjectMapper objectMapper) {
+        this.restTemplate = restTemplate;
+        this.kakaoUserRepository = kakaoUserRepository;
+        this.objectMapper = objectMapper;
+    }
 
-    @Value("${kakao.client.secret}")
-    private String clientSecret;
-
-    @Value("${kakao.redirect.uri}")
-    private String redirectUri;
-
-    private final RestTemplate restTemplate = new RestTemplate();
-
-    @PostMapping("/callback")
-    public ResponseEntity<String> kakaoCallback(@RequestBody KakaoTokenRequest tokenRequest) {
-        String code = tokenRequest.getCode();
-        if (code == null || code.isEmpty()) {
-            return ResponseEntity.badRequest().body("Authorization code is missing");
+    @GetMapping("/kakao/callback")
+    public ResponseEntity<String> kakaoCallback(@RequestParam String code) {
+        String accessTokenResponse = getAccessToken(code);
+        if (accessTokenResponse == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to get access token");
         }
-        logger.info("Received authorization code: {}", code);
 
-        // 액세스 토큰 요청
-        String tokenUrl = "https://kauth.kakao.com/oauth/token";
+        String accessToken = extractAccessToken(accessTokenResponse);
+        if (accessToken == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to get access token");
+        }
+
+        // 사용자 정보 요청 및 DB에 저장
+        String userInfo = getUserInfo(accessToken);
+        saveOrUpdateKakaoUser(userInfo);
+
+        return ResponseEntity.ok(userInfo);
+    }
+
+    private String extractAccessToken(String response) {
+        try {
+            Map<String, Object> responseMap = objectMapper.readValue(response, Map.class);
+            return (String) responseMap.get("access_token");
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private String getUserInfo(String accessToken) {
+        String url = "https://kapi.kakao.com/v2/user/me";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        return response.getBody();
+    }
+
+    private void saveOrUpdateKakaoUser(String userInfo) {
+        JSONObject jsonObject = new JSONObject(userInfo);
+        Long kakaoId = jsonObject.getLong("id");
+        String nickname = jsonObject.getJSONObject("properties").getString("nickname");
+        String profileImage = jsonObject.getJSONObject("properties").optString("profile_image", null);
+
+        Optional<KakaoUser> existingUser = kakaoUserRepository.findByKakaoId(kakaoId);
+        KakaoUser user;
+
+        if (existingUser.isPresent()) {
+            user = existingUser.get();
+            user.setNickname(nickname);
+            user.setProfileImage(profileImage);
+        } else {
+            user = new KakaoUser();
+            user.setKakaoId(kakaoId);
+            user.setNickname(nickname);
+            user.setProfileImage(profileImage);
+        }
+
+        kakaoUserRepository.save(user);
+    }
+
+    public String getAccessToken(String code) {
+        String url = "https://kauth.kakao.com/oauth/token";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        Map<String, String> tokenParams = new HashMap<>();
-        tokenParams.put("grant_type", "authorization_code");
-        tokenParams.put("client_id", clientId);
-        tokenParams.put("redirect_uri", redirectUri);
-        tokenParams.put("code", code);
-        tokenParams.put("client_secret", clientSecret);
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "authorization_code");
+        params.add("client_id", "39a096f2c5fa71cb1ffde623e22d201b");
+        params.add("redirect_uri", "http://localhost:8080/kakao/callback");
+        params.add("code", code);
+        params.add("client_secret", "AL8c4rXT3cH35L68qViBIPH6VvJRGjUR"); // 필요 시 추가
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
-        HttpEntity<Map<String, String>> tokenRequestEntity = new HttpEntity<>(tokenParams, headers);
         try {
-            ResponseEntity<Map> tokenResponse = restTemplate.exchange(tokenUrl, HttpMethod.POST, tokenRequestEntity, Map.class);
-
-            if (!tokenResponse.getStatusCode().is2xxSuccessful()) {
-                logger.error("Failed to get access token. Status code: {}", tokenResponse.getStatusCode());
-                return ResponseEntity.status(tokenResponse.getStatusCode()).body("Failed to get access token");
-            }
-
-            // 액세스 토큰 추출
-            Map<String, Object> tokenBody = tokenResponse.getBody();
-            String accessToken = (String) tokenBody.get("access_token");
-            logger.info("Received access token: {}", accessToken);
-
-            // 액세스 토큰을 이용해 사용자 정보 요청
-            String userInfoUrl = "https://kapi.kakao.com/v2/user/me";
-            HttpHeaders userHeaders = new HttpHeaders();
-            userHeaders.setBearerAuth(accessToken);
-
-            HttpEntity<Void> userRequest = new HttpEntity<>(userHeaders);
-            ResponseEntity<Map> userResponse = restTemplate.exchange(userInfoUrl, HttpMethod.GET, userRequest, Map.class);
-
-            return ResponseEntity.ok(userResponse.getBody().toString());
-
-        } catch (Exception e) {
-            logger.error("Error during token request", e);
-            return ResponseEntity.status(500).body("Error during token request");
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            System.out.println("Error in getAccessToken: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            return null;
         }
     }
+    @GetMapping("/api/check-user")
+    public ResponseEntity<Map<String, Boolean>> checkUser(@RequestParam Long kakaoId) {
+        Optional<KakaoUser> user = kakaoUserRepository.findByKakaoId(kakaoId);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("exists", user.isPresent());
+        return ResponseEntity.ok(response);
+    }
+
+
 }
