@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 public class TestResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long testResultId; // Integer -> Long 변경
+    private Long testResultId;
 
     @ManyToOne
     @JoinColumn(name = "testId", nullable = false)
@@ -20,6 +20,9 @@ public class TestResult {
     private Integer score;
     private String createdAt;
     private String updatedAt;
+
+    // 회차 정보
+    private Integer testRound;
 
     // Getters and Setters
     public Long getTestResultId() {
@@ -76,5 +79,13 @@ public class TestResult {
 
     public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Integer getTestRound() {
+        return testRound;
+    }
+
+    public void setTestRound(Integer testRound) {
+        this.testRound = testRound;
     }
 }
