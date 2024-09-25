@@ -59,7 +59,6 @@ public class TestController {
         testResult.setScore(score);    // Test에서 계산된 점수 저장
         testResult.setResultType("Final Result");  // 임의의 resultType 설정
         testResult.setCreatedAt(new Date().toString());
-        testResult.setUpdatedAt(new Date().toString());
 
         // TestResult 저장
         testResultRepository.save(testResult);

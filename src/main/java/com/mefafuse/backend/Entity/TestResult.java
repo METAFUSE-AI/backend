@@ -17,12 +17,22 @@ public class TestResult {
     private Member member;
 
     private String resultType;
-    private Integer score;
+    private Integer score; // 총점
     private String createdAt;
-    private String updatedAt;
 
     // 회차 정보
     private Integer testRound;
+
+    public Integer getMetaCognitionScore() {
+        return metaCognitionScore;
+    }
+
+    // 메타인지 점수 분류 (메타인식, 모니터링, 메타통제)
+    private Integer metaCognitionScore;
+    private Integer monitoringScore;
+    private Integer metaControlScore;
+
+
 
     // Getters and Setters
     public Long getTestResultId() {
@@ -73,14 +83,6 @@ public class TestResult {
         this.createdAt = createdAt;
     }
 
-    public String getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(String updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
     public Integer getTestRound() {
         return testRound;
     }
@@ -88,4 +90,25 @@ public class TestResult {
     public void setTestRound(Integer testRound) {
         this.testRound = testRound;
     }
+
+    public void setMetaCognitionScore(Integer metaCognitionScore) {
+        this.metaCognitionScore = metaCognitionScore;
+    }
+
+    public Integer getMonitoringScore() {
+        return monitoringScore;
+    }
+
+    public void setMonitoringScore(Integer monitoringScore) {
+        this.monitoringScore = monitoringScore;
+    }
+
+    public Integer getMetaControlScore() {
+        return metaControlScore;
+    }
+
+    public void setMetaControlScore(Integer metaControlScore) {
+        this.metaControlScore = metaControlScore;
+    }
+
 }
