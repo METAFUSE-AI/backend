@@ -16,21 +16,21 @@ public class TestController {
     @Autowired
     private TestRepository testRepository;
 
-    @Autowired
-    private MemberRepository memberRepository;
+   //@Autowired
+   //private MemberRepository memberRepository;
 
-    @PostMapping("/create")
-    public Test createTest(@RequestBody Test test) {
-        // 여기서 멤버 ID를 받아서 처리
-        Long memberId = test.getMember().getMemberId(); // 프론트에서 받은 memberId 사용
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("Member not found with id " + memberId));
+   //@PostMapping("/create")
+   //public Test createTest(@RequestBody Test test) {
+   //    // 여기서 멤버 ID를 받아서 처리
+   //    Long memberId = test.getMember().getMemberId(); // 프론트에서 받은 memberId 사용
+   //    Member member = memberRepository.findById(memberId)
+   //            .orElseThrow(() -> new RuntimeException("Member not found with id " + memberId));
 
-        // Test 엔티티에 Member 설정
-        test.setMember(member);
-        test.setCreatedAt(new Date());
-        test.setUpdatedAt(new Date());
+   //    // Test 엔티티에 Member 설정
+   //    test.setMember(member);
+   //    test.setCreatedAt(new Date());
+   //    test.setUpdatedAt(new Date());
 
-        return testRepository.save(test);
-    }
+   //    return testRepository.save(test);
+   //}
 }

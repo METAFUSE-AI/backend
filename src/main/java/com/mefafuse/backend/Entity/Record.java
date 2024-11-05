@@ -1,17 +1,16 @@
-package com.mefafuse.backend.Entity;
+package  com.mefafuse.backend.Entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
 public class Record {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long recordId; // 변경된 ID 타입
+    private Long recordId;
 
     @ManyToOne
-    @JoinColumn(name = "memberId", nullable = false)
+    @JoinColumn(name = "username", referencedColumnName = "username", nullable = false)
     private Member member;
 
     private String recordHistory;
