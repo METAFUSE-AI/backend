@@ -1,8 +1,14 @@
 package com.mefafuse.backend.Entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Member {
     public Long getMemberId() {
         return memberId;
@@ -25,5 +31,4 @@ public class Member {
     private Long memberId;
     private String name;
 
-    // getters and setters
 }

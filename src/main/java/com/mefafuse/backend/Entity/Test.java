@@ -1,9 +1,17 @@
 package com.mefafuse.backend.Entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.Date;
 
 @Entity
+@Table(name = "test")
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Test {
 
     @Id
@@ -23,69 +31,4 @@ public class Test {
     // 질문 점수를 배열로 처리
     @ElementCollection
     private int[] questionScores; // 질문에 대한 점수 리스트
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Member getMember() {
-        return member;
-    }
-
-    public void setMember(Member member) {
-        this.member = member;
-    }
-
-    public String getQuestion() {
-        return question;
-    }
-
-    public void setQuestion(String question) {
-        this.question = question;
-    }
-
-    public Date getTestDate() {
-        return testDate;
-    }
-
-    public void setTestDate(Date testDate) {
-        this.testDate = testDate;
-    }
-
-    public int getTestScore() {
-        return testScore;
-    }
-
-    public void setTestScore(int testScore) {
-        this.testScore = testScore;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public int[] getQuestionScores() {
-        return questionScores;
-    }
-
-    public void setQuestionScores(int[] questionScores) {
-        this.questionScores = questionScores;
-    }
 }

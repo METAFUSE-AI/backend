@@ -1,8 +1,15 @@
 package com.mefafuse.backend.Entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Table(name = "test_result")
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class TestResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,84 +38,5 @@ public class TestResult {
     private Integer metaCognitionScore;
     private Integer monitoringScore;
     private Integer metaControlScore;
-
-
-
-    // Getters and Setters
-    public Long getTestResultId() {
-        return testResultId;
-    }
-
-    public void setTestResultId(Long testResultId) {
-        this.testResultId = testResultId;
-    }
-
-    public Test getTest() {
-        return test;
-    }
-
-    public void setTest(Test test) {
-        this.test = test;
-    }
-
-    public Member getMember() {
-        return member;
-    }
-
-    public void setMember(Member member) {
-        this.member = member;
-    }
-
-    public String getResultType() {
-        return resultType;
-    }
-
-    public void setResultType(String resultType) {
-        this.resultType = resultType;
-    }
-
-    public Integer getScore() {
-        return score;
-    }
-
-    public void setScore(Integer score) {
-        this.score = score;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Integer getTestRound() {
-        return testRound;
-    }
-
-    public void setTestRound(Integer testRound) {
-        this.testRound = testRound;
-    }
-
-    public void setMetaCognitionScore(Integer metaCognitionScore) {
-        this.metaCognitionScore = metaCognitionScore;
-    }
-
-    public Integer getMonitoringScore() {
-        return monitoringScore;
-    }
-
-    public void setMonitoringScore(Integer monitoringScore) {
-        this.monitoringScore = monitoringScore;
-    }
-
-    public Integer getMetaControlScore() {
-        return metaControlScore;
-    }
-
-    public void setMetaControlScore(Integer metaControlScore) {
-        this.metaControlScore = metaControlScore;
-    }
 
 }

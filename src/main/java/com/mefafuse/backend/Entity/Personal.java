@@ -2,11 +2,17 @@ package com.mefafuse.backend.Entity;
 
 import com.mefafuse.backend.Entity.idclass.PersonalId;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
+@Builder
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @IdClass(PersonalId.class)
 public class Personal implements Serializable {
 
