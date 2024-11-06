@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mefafuse.backend.Entity.Member;
 import com.mefafuse.backend.Entity.Test;
 import com.mefafuse.backend.Entity.TestResult;
+import com.mefafuse.backend.Repository.MemberIdRepository;
 import com.mefafuse.backend.Repository.MemberRepository;
 import com.mefafuse.backend.Repository.TestRepository;
 import com.mefafuse.backend.Repository.TestResultRepository;
@@ -25,7 +26,7 @@ public class TestController {
     private TestRepository testRepository;
 
     @Autowired
-    private MemberRepository memberRepository;
+    private MemberIdRepository memberRepository;
 
     @Autowired
     private TestResultRepository testResultRepository;  // TestResultRepository 추가
