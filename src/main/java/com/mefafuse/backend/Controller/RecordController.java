@@ -1,12 +1,12 @@
 package com.mefafuse.backend.Controller;
+import com.mefafuse.backend.Entity.Member;
 import com.mefafuse.backend.Repository.MemberRepository;
 import com.mefafuse.backend.Repository.RecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.mefafuse.backend.Entity.Member;
-import com.mefafuse.backend.Entity.Record;
+
 import java.util.List;
 import java.util.Optional;
 
