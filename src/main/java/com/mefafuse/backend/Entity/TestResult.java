@@ -11,32 +11,27 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TestResult {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long testResultId;
+    private Long resultId;
 
     @ManyToOne
-    @JoinColumn(name = "testId", nullable = false)
+    @JoinColumn(name = "test_id", nullable = false)
     private Test test;
 
     @ManyToOne
-    @JoinColumn(name = "memberId", nullable = false)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    private String resultType;
-    private Integer score; // 총점
-    private String createdAt;
+    private int score;  // 테스트 총점
 
-    // 회차 정보
-    private Integer testRound;
+    // 점수 관련 필드 추가
+    private int metaCognitionScore;
+    private int monitoringScore;
+    private int metaControlScore;
 
-    public Integer getMetaCognitionScore() {
-        return metaCognitionScore;
-    }
+    private String createdAt;  // 생성일
 
-    // 메타인지 점수 분류 (메타인식, 모니터링, 메타통제)
-    private Integer metaCognitionScore;
-    private Integer monitoringScore;
-    private Integer metaControlScore;
-
+    private int testRound;  // 테스트 진행 회차 (round)
 }

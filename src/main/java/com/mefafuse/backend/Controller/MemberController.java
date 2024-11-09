@@ -13,6 +13,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/members")
+@CrossOrigin(origins = "http://localhost:3000") // 또는 필요한 도메인 주소로 설정
+
 public class MemberController {
 
     @Autowired
@@ -36,7 +38,6 @@ public class MemberController {
     }
 
 
-    // 아이디 중복 확인
     @GetMapping("/check")
     public ResponseEntity<Boolean> checkDuplicateId(@RequestParam String username) {
         boolean exists = memberRepository.existsByUsername(username);

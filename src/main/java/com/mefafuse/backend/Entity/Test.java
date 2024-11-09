@@ -16,7 +16,7 @@ public class Test {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long testId;
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
@@ -27,7 +27,7 @@ public class Test {
     private int testScore; // 총점
     private Date createdAt;
     private Date updatedAt;
-
+    private int round;
     // 질문 점수를 배열로 처리
     @ElementCollection
     private int[] questionScores; // 질문에 대한 점수 리스트
