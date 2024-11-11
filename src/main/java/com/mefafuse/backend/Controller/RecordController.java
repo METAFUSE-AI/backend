@@ -32,7 +32,7 @@ public class RecordController {
 
     // 특정 ID의 기록 조회
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> getRecordById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<?>> getRecordById(@PathVariable("id") Long id) {
         Optional<Record> record = recordRepository.findById(id);
         if (!record.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -68,7 +68,7 @@ public class RecordController {
 
     // 기록 업데이트
     @PutMapping("/{id}")
-    public ResponseEntity<Record> updateRecord(@PathVariable Long id, @RequestBody Record record) {
+    public ResponseEntity<Record> updateRecord(@PathVariable("id") Long id, @RequestBody Record record) {
         if (!recordRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -79,7 +79,7 @@ public class RecordController {
 
     // 기록 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRecord(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteRecord(@PathVariable("id") Long id) {
         if (!recordRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }

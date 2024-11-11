@@ -42,7 +42,7 @@ public class MemberController {
 
     // 아이디 중복 확인 //Boolean 반환
     @GetMapping("/check")
-    public ResponseEntity<ApiResponse<?>> checkDuplicateId(@RequestParam String username) {
+    public ResponseEntity<ApiResponse<?>> checkDuplicateId(@RequestParam(name = "username") String username) {
         boolean exists = memberRepository.existsByUsername(username);
         return ResponseEntity.ok(
                 ApiResponse.successResponse(SuccessCode.CheckUsernameSuccess, exists));
