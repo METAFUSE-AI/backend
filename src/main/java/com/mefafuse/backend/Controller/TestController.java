@@ -1,92 +1,113 @@
 package com.mefafuse.backend.Controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mefafuse.backend.Entity.Member;
 import com.mefafuse.backend.Entity.Test;
-import com.mefafuse.backend.Entity.TestResult;
-import com.mefafuse.backend.Repository.MemberIdRepository;
 import com.mefafuse.backend.Repository.MemberRepository;
 import com.mefafuse.backend.Repository.TestRepository;
-import com.mefafuse.backend.Repository.TestResultRepository;
-import com.mefafuse.backend.Response.ApiResponse;
-import com.mefafuse.backend.Response.ErrorCode;
-import com.mefafuse.backend.Response.SuccessCode;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/tests")
-@CrossOrigin(origins = "http://172.30.1.36:19006")
 public class TestController {
 
     @Autowired
     private TestRepository testRepository;
 
     @Autowired
-    private MemberIdRepository memberRepository;
+    private MemberRepository memberRepository;
 
-    @Autowired
-    private TestResultRepository testResultRepository;  // TestResultRepository 추가
-
-    private final ObjectMapper objectMapper = new ObjectMapper();  // JSON 파싱을 위한 ObjectMapper
-
+    // 테스트 생성
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<?>> createTest(@RequestBody Test test) {
-        Optional<Member> memberOptional = memberRepository.findById(test.getMember().getMemberId());
-        if (!memberOptional.isPresent()) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.errorResponse(ErrorCode.MemberNotFound));
-        }
+    @Transactional
+    public ResponseEntity<Map<String, Long>> createTest(@RequestBody Test test) {
+        String username = test.getMember().getUsername();  // username을 가져옴
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Member not found with username " + username));
 
-        test.setMember(memberOptional.get());
+        // Test 객체 설정
+        test.setMember(member);
         test.setCreatedAt(new Date());
         test.setUpdatedAt(new Date());
 
-        int score = calculateScoreFromQuestion(test.getQuestion());
-        if (score == -1) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.errorResponse(ErrorCode.InvalidQuestionScore));
-        }
+        // username을 기준으로 최대 seq 값을 가져옴
+        Integer maxSeq = testRepository.findMaxSeqByUsername(username);
+        test.setSeq((maxSeq != null ? maxSeq : 0) + 1);
 
-        test.setTestScore(score);
-        Test createdTest = testRepository.save(test);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.successResponse(SuccessCode.TestCreationSuccess, createdTest));
+        // 점수 세팅
+        test.setTotalScore(test.getTotalScore());
+        test.setMetaCognitionScore(test.getMetaCognitionScore());
+        test.setMonitoringScore(test.getMonitoringScore());
+        test.setMetaControlScore(test.getMetaControlScore());
+
+        // 테스트 저장
+        Test savedTest = testRepository.save(test);
+
+        // testId를 반환
+        Map<String, Long> response = new HashMap<>();
+        response.put("testId", savedTest.getTestId());
+
+        return ResponseEntity.ok(response);
     }
 
-    // question (key-value) 값으로부터 score를 계산하는 메서드
-    private int calculateScoreFromQuestion(String question) {
-        int totalScore = 0;
-        try {
-            // question을 JSON으로 파싱
-            JsonNode rootNode = objectMapper.readTree(question);
+    // 특정 testId에 대한 점수 요약 정보를 반환
+    @GetMapping("/{testId}/scores")
+    public ResponseEntity<Map<String, Object>> getScoreSummaryByTest(@PathVariable Long testId) {
+        Test test = testRepository.findById(testId)
+                .orElseThrow(() -> new RuntimeException("Test not found with testId " + testId));
 
-            // key-value 값을 하나씩 순회하며 value 값을 더함
-            Iterator<Map.Entry<String, JsonNode>> fields = rootNode.fields();
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> field = fields.next();
-                JsonNode valueNode = field.getValue();
+        Member member = test.getMember();  // Test에서 Member 정보 가져오기
 
-                // value 값이 숫자인 경우에만 더함
-                if (valueNode.isInt()) {
-                    totalScore += valueNode.asInt();
-                } else {
-                    System.out.println("Invalid value for key: " + field.getKey());
-                }
-            }
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        // 점수 초기화
+        int totalScoreSum = test.getTotalScore();
+        int metaCognitionScoreSum = test.getMetaCognitionScore();
+        int monitoringScoreSum = test.getMonitoringScore();
+        int metaControlScoreSum = test.getMetaControlScore();
 
-        return totalScore;
+        // 응답 객체 생성
+        Map<String, Object> scoreSummary = new HashMap<>();
+        scoreSummary.put("totalScoreSum", totalScoreSum);
+        scoreSummary.put("metaCognitionScoreSum", metaCognitionScoreSum);
+        scoreSummary.put("monitoringScoreSum", monitoringScoreSum);
+        scoreSummary.put("metaControlScoreSum", metaControlScoreSum);
+
+        Map<String, Object> scoreDetail = new HashMap<>();
+        scoreDetail.put("testId", test.getTestId());
+        scoreDetail.put("date", test.getCreatedAt());
+        scoreDetail.put("totalScore", test.getTotalScore());
+        scoreDetail.put("metaCognitionScore", test.getMetaCognitionScore());
+        scoreDetail.put("monitoringScore", test.getMonitoringScore());
+        scoreDetail.put("metaControlScore", test.getMetaControlScore());
+
+        scoreSummary.put("scoreDetails", List.of(scoreDetail)); // 세부 정보
+
+        return ResponseEntity.ok(scoreSummary);
     }
+
+    // username을 기준으로 테스트 결과를 가져오는 메서드
+    @GetMapping("/{username}")
+    public ResponseEntity<List<Map<String, Object>>> getTestResultsByUsername(@PathVariable String username) {
+        // username에 해당하는 테스트 목록 가져오기
+        List<Test> tests = testRepository.findByMember_Username(username);  // username으로 테스트를 찾음
+
+        // 결과 리스트 생성
+        List<Map<String, Object>> testResults = tests.stream().map(test -> {
+            Map<String, Object> result = new HashMap<>();
+            result.put("testId", test.getTestId());
+            result.put("seq", test.getSeq());
+            result.put("createdAt", test.getCreatedAt());
+            return result;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(testResults);  // 테스트 결과 반환
+    }
+
 }

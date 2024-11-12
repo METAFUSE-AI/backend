@@ -1,23 +1,22 @@
 package com.mefafuse.backend.Entity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
-
-import jakarta.persistence.*;
 @Entity
 @Table(name = "members")
 public class Member {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long memberId; // 숫자로 된 고유 ID
-
     @Column(unique = true, nullable = false)
-    private String username; // 사용자가 입력하는 문자열 ID, 변경됨
+    private String username;
 
     @Column(nullable = false)
-    private String password; // 패스워드
+    private String password;
 
     @Column(nullable = false)
-    private String name; // 사용자 이름
+    private String name;
 
     // 생성자, Getter, Setter 추가
     public Member() {}
@@ -28,15 +27,7 @@ public class Member {
         this.name = name;
     }
 
-    public Long getMemberId() {
-        return memberId;
-    }
-
-    public void setMemberId(Long memberId) {
-        this.memberId = memberId;
-    }
-
-    public String getUsername() { // getter 이름도 변경됨
+    public String getUsername() {
         return username;
     }
 
