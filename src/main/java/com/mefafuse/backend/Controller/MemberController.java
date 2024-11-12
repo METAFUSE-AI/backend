@@ -1,16 +1,22 @@
 // MemberController 클래스
 package com.mefafuse.backend.Controller;
+import com.mefafuse.backend.Response.ApiResponse;
+import com.mefafuse.backend.Response.ErrorCode;
+import com.mefafuse.backend.Response.SuccessCode;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.mefafuse.backend.Entity.Member;
 import com.mefafuse.backend.Repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+
 
 import java.util.Optional;
 import java.util.HashMap;
 import java.util.Map;
 
+@CrossOrigin(origins = "*")  // CORS 허용
 @RestController
 @RequestMapping("/members")
 public class MemberController {
@@ -20,46 +26,46 @@ public class MemberController {
 
     // 회원가입
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(@RequestBody Member member) {
-        Map<String, String> response = new HashMap<>();
-
+    public ResponseEntity<ApiResponse<?>> register(@RequestBody Member member) {
         if (memberRepository.existsByUsername(member.getUsername())) {
-            response.put("message", "이미 사용 중인 아이디입니다.");
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.errorResponse(ErrorCode.UsernameAlreadyExists));
         }
 
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        member.setPassword(passwordEncoder.encode(member.getPassword())); // 비밀번호 해시화
+        member.setPassword(passwordEncoder.encode(member.getPassword()));
         memberRepository.save(member);
-        response.put("message", "회원가입 성공");
-        return ResponseEntity.ok(response);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.successResponse(SuccessCode.RegisterSuccess, null));
     }
 
-
-    // 아이디 중복 확인
+    // 아이디 중복 확인 //Boolean 반환
     @GetMapping("/check")
-    public ResponseEntity<Boolean> checkDuplicateId(@RequestParam String username) {
+    public ResponseEntity<ApiResponse<?>> checkDuplicateId(@RequestParam(name = "username") String username) {
         boolean exists = memberRepository.existsByUsername(username);
-        return ResponseEntity.ok(exists);
+        return ResponseEntity.ok(
+                ApiResponse.successResponse(SuccessCode.CheckUsernameSuccess, exists));
     }
+
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody Member member) {
+    public ResponseEntity<ApiResponse<?>> login(@RequestBody Member member) {
         Optional<Member> optionalMember = memberRepository.findByUsername(member.getUsername());
-
-        if (optionalMember.isPresent()) {
-            Member foundMember = optionalMember.get();
-            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-            // 입력한 비밀번호와 데이터베이스의 비밀번호 비교
-            if (passwordEncoder.matches(member.getPassword(), foundMember.getPassword())) {
-                return ResponseEntity.ok("로그인 성공");
-            } else {
-                return ResponseEntity.badRequest().body("비밀번호가 올바르지 않습니다.");
-            }
+        if (!optionalMember.isPresent()) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.errorResponse(ErrorCode.UserNotFound));
         }
 
-        return ResponseEntity.badRequest().body("존재하지 않는 아이디입니다.");
+        Member foundMember = optionalMember.get();
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        if (!passwordEncoder.matches(member.getPassword(), foundMember.getPassword())) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.errorResponse(ErrorCode.InvalidPassword));
+        }
+
+        return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.LoginSuccess, null));
     }
+
 }
