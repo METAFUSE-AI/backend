@@ -1,4 +1,5 @@
 package com.mefafuse.backend.Controller;
+
 import com.mefafuse.backend.Repository.MemberRepository;
 import com.mefafuse.backend.Repository.RecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.mefafuse.backend.Entity.Member;
 import com.mefafuse.backend.Entity.Record;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -27,18 +29,23 @@ public class RecordController {
         return new ResponseEntity<>(records, HttpStatus.OK);
     }
 
-    // 특정 ID의 기록 조회
-    @GetMapping("/{id}")
-    public ResponseEntity<Record> getRecordById(@PathVariable Long id) {
-        Optional<Record> record = recordRepository.findById(id);
-        return record.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    // 특정 멤버의 기록 조회 (선택적으로 유지 가능)
+    // 특정 멤버의 기록 조회
     @GetMapping("/member/{username}")
     public ResponseEntity<List<Record>> getRecordsByUsername(@PathVariable String username) {
         List<Record> records = recordRepository.findByMember_Username(username);
         return new ResponseEntity<>(records, HttpStatus.OK);
+    }
+
+    // 특정 기록 조회 (recordId 기준)
+    @GetMapping("/{recordId}")
+    public ResponseEntity<Record> getRecordById(@PathVariable Long recordId) {
+        Optional<Record> record = recordRepository.findById(recordId);
+
+        if (record.isPresent()) {
+            return new ResponseEntity<>(record.get(), HttpStatus.OK);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     // 기록 생성
@@ -56,24 +63,33 @@ public class RecordController {
         return new ResponseEntity<>(createdRecord, HttpStatus.CREATED);
     }
 
-    // 기록 업데이트
-    @PutMapping("/{id}")
-    public ResponseEntity<Record> updateRecord(@PathVariable Long id, @RequestBody Record record) {
-        if (!recordRepository.existsById(id)) {
+    // 특정 기록 업데이트 (recordId 기준)
+    @PutMapping("/{recordId}")
+    public ResponseEntity<Record> updateRecord(@PathVariable Long recordId, @RequestBody Record record) {
+        Optional<Record> existingRecordOptional = recordRepository.findById(recordId);
+
+        if (!existingRecordOptional.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-        record.setRecordId(id);
+
+        Record existingRecord = existingRecordOptional.get();
+        record.setMember(existingRecord.getMember());  // 기존 멤버 유지
+        record.setRecordId(existingRecord.getRecordId()); // 기존 recordId 유지
+
         Record updatedRecord = recordRepository.save(record);
         return new ResponseEntity<>(updatedRecord, HttpStatus.OK);
     }
 
-    // 기록 삭제
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRecord(@PathVariable Long id) {
-        if (!recordRepository.existsById(id)) {
+    // 특정 기록 삭제 (recordId 기준)
+    @DeleteMapping("/{recordId}")
+    public ResponseEntity<Void> deleteRecord(@PathVariable Long recordId) {
+        Optional<Record> record = recordRepository.findById(recordId);
+
+        if (!record.isPresent()) {
             return ResponseEntity.notFound().build();
         }
-        recordRepository.deleteById(id);
+
+        recordRepository.delete(record.get());
         return ResponseEntity.noContent().build();
     }
 }
